@@ -15,4 +15,4 @@ white = gray(255)
 
 # Constants
 boardSide = 800
-gridLength = 20
+gridLength = 5
