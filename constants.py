@@ -15,4 +15,5 @@ white = gray(255)
 
 # Constants
 boardSide = 800
-gridLength = 5
+gridLength = 20
+bombCount = 20

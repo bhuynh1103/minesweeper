@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from cell import *
 from constants import *
+from random import randint as rand
 
 
 pygame.init()
@@ -14,11 +15,24 @@ for i in range(gridLength):
     grid.append([])
     for j in range(gridLength):
         grid[i].append(Cell(i, j, boardSide // gridLength))
-
+        
+# Generates bombs
+countBombs = 0
+while countBombs != bombCount:
+    i = rand(0, gridLength - 1)
+    j = rand(0, gridLength - 1)
+    if not grid[i][j].bomb:
+        grid[i][j].bomb = True
+        countBombs += 1
+        
+    
+# Counts neighboring bombs for each cell
 for x in range(gridLength):
     for y in range(gridLength):
         grid[x][y].count(grid)
-        print(grid[x][y].neighbors)
+        # DEBUG
+        # print(grid[x][y].neighbors)
+
 
 leftClicked = False
 rightClicked = False
@@ -30,20 +44,21 @@ while True:
 
     mousePos = pygame.mouse.get_pos()
 
-    for x in range(gridLength):
-        for y in range(gridLength):
-            grid[x][y].draw(screen)
+    for i in range(gridLength):
+        for j in range(gridLength):
+            grid[i][j].draw(screen)
+            grid[i][j].writeNeighbors(screen)
 
-            if grid[x][y].has(mousePos) and leftClicked:
-                grid[x][y].revealed = True
-            elif grid[x][y].has(mousePos) and rightClicked and not grid[x][y].flagged:
-                grid[x][y].flagged = True
-            elif grid[x][y].has(mousePos) and grid[x][y].flagged and spacePressed:
-                grid[x][y].flagged = False
+            if grid[i][j].has(mousePos) and leftClicked:
+                grid[i][j].revealed = True
+            elif grid[i][j].has(mousePos) and rightClicked and not grid[x][y].flagged:
+                grid[i][j].flagged = True
+            elif grid[i][j].has(mousePos) and grid[x][y].flagged and spacePressed:
+                grid[i][j].flagged = False
 
             # DEBUG
             # if grid[x][y].has(mousePos):
-            #     print(grid[x][y].neighbors)
+                # print(grid[x][y].neighbors)
 
     pygame.display.update()
 

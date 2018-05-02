@@ -10,11 +10,7 @@ class Cell:
         self.x = i * (boardSide // gridLength)
         self.y = j * (boardSide // gridLength)
         self.w = width
-        # Cells currently have 50% chance of having a bomb
-        if randint(0, 2) == 1:
-            self.bomb = True
-        else:
-            self.bomb = False
+        self.bomb = False
         self.revealed = False
         self.flagged = False
         self.neighbors = 0
@@ -47,7 +43,22 @@ class Cell:
             count = 0
             for x in range(-1, 2):
                 for y in range(-1, 2):
-                    if grid[self.i + x][self.j + y].bomb:
-                        count += 1
+                    i = self.i + x
+                    j = self.j + y
+                    if not(i < 0 or j < 0 or i > gridLength - 1 or j > gridLength - 1):
+                        if grid[i][j].bomb:
+                            count += 1
 
             self.neighbors = count
+            
+    def writeNeighbors(self, window):
+        if self.revealed and not self.bomb and not self.neighbors == 0:
+            font = pygame.font.Font(None, int((boardSide // gridLength) * .9))
+            text = font.render(str(self.neighbors), 1, black)
+            textpos = text.get_rect()
+            textpos.centerx = self.x + self.w * .5
+            textpos.centery = self.y + self.w * .5
+            window.blit(text, textpos)
+            return (textpos)
+        
+        
