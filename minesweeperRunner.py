@@ -9,14 +9,15 @@ pygame.init()
 screen = pygame.display.set_mode((boardSide, boardSide))
 
 
-# Creates grid which holds all cells
+# Generates grid which holds all cells
 grid = []
 for i in range(gridLength):
     grid.append([])
     for j in range(gridLength):
         grid[i].append(Cell(i, j, boardSide // gridLength))
 
-# Generates bombs
+
+# Generates "bombCount" bombs
 countBombs = 0
 while countBombs != bombCount:
     i = rand(0, gridLength - 1)
@@ -57,7 +58,7 @@ while True:
 
             elif grid[i][j].has(mousePos) and rightClicked and not grid[x][y].flagged:
                 grid[i][j].flagged = True
-            elif grid[i][j].has(mousePos) and grid[x][y].flagged and spacePressed:
+            elif grid[i][j].has(mousePos) and grid[i][j].flagged and spacePressed:
                 grid[i][j].flagged = False
 
             # DEBUG

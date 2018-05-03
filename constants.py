@@ -16,7 +16,7 @@ black = gray(0)
 white = gray(255)
 
 # number colors list
-color = [blue, green, red, purple, maroon, turquoise, black, gray(75) ]
+color = [blue, green, red, purple, maroon, turquoise, black, gray(90) ]
 
 # Constants
 boardSide = 800

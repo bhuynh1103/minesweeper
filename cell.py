@@ -23,6 +23,7 @@ class Cell:
         if self.flagged and not self.revealed:
             pygame.draw.rect(window, gray(100), (self.x, self.y, self.w, self.w))
             pygame.draw.rect(window, black, (self.x, self.y, self.w, self.w), 1)
+            
         # If revealed draw its contents (bomb or no bomb)
         elif self.revealed:
             pygame.draw.rect(window, gray(200), (self.x, self.y, self.w, self.w))
@@ -32,12 +33,14 @@ class Cell:
                                                     self.y + (self.w - (self.w * .75)) - (self.w * .125),
                                                     self.w * .75, self.w * .75))
 
+    # Checks to see if mouse is above cell
     def has(self, mousePos):
         mouseX = mousePos[0]
         mouseY = mousePos[1]
         return (mouseX > self.x and mouseX < self.x + self.w and
                 mouseY > self.y and mouseY < self.y + self.w)
 
+    # Counts neighboring bombs
     def count(self, grid):
         if not self.bomb:
             count = 0
@@ -51,6 +54,8 @@ class Cell:
 
             self.neighbors = count
 
+    # If cell is clicked, cell will reveal itself and revealNeighbors if the cell clicked has zero neighbors
+    # Repeats if neighboring cell that was revealed has zero neighbors
     def reveal(self, grid):
         self.revealed = True
         if self.neighbors == 0 and not self.flagged:
@@ -62,7 +67,7 @@ class Cell:
                 i = self.i + x
                 j = self.j + y
                 if not(i < 0 or j < 0 or i > gridLength - 1 or j > gridLength - 1):
-                    if not grid[i][j].bomb and not grid[i][j].revealed:
+                    if not grid[i][j].bomb and not grid[i][j].revealed and not grid[i][j].flagged:
                         grid[i][j].reveal(grid)
 
     def writeNeighbors(self, window):
