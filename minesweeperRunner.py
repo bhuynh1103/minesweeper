@@ -44,6 +44,7 @@ while True:
 
     mousePos = pygame.mouse.get_pos()
 
+    # For each cell in the grid, executes methods such as draw or check if clicked.
     for i in range(gridLength):
         for j in range(gridLength):
             grid[i][j].draw(screen)
@@ -54,18 +55,6 @@ while True:
                 if grid[i][j].neighbors == 0 and not grid[i][j].bomb and not grid[i][j].flagged:
                     grid[i][j].revealNeighbors(grid)
 
-            if grid[i][j].has(mousePos) and leftClicked and grid[i][j].revealed:
-                grid[i][j].revealNeighbors(grid)
-                '''
-                if grid[i][j].neighbors == 0 and not grid[i][j].bomb:
-                    for x in range(-1, 2):
-                        for y in range(-1, 2):
-                            a = grid[i][j].i + x
-                            b = grid[i][j].j + y
-                            if not(a < 0 or b < 0 or a > gridLength - 1 or b > gridLength - 1):
-                                grid[a][b].revealed = True
-                                if grid[a][b].neighbors == 0:
-                '''
             elif grid[i][j].has(mousePos) and rightClicked and not grid[x][y].flagged:
                 grid[i][j].flagged = True
             elif grid[i][j].has(mousePos) and grid[x][y].flagged and spacePressed:
