@@ -4,17 +4,16 @@ from cell import *
 from constants import *
 from random import randint as rand
 
-
 pygame.init()
 screen = pygame.display.set_mode((boardSide, boardSide))
-
+pygame.display.set_caption("Minesweeper")
 
 # Generates grid which holds all cells
 grid = []
 for i in range(gridLength):
     grid.append([])
     for j in range(gridLength):
-        grid[i].append(Cell(i, j, boardSide // gridLength))
+        grid[i].append(Cell(i, j))
 
 
 # Generates "bombCount" bombs
@@ -31,68 +30,103 @@ while countBombs != bombCount:
 for x in range(gridLength):
     for y in range(gridLength):
         grid[x][y].count(grid)
-        # DEBUG
-        # print(grid[x][y].neighbors)
 
 
+# Function for drawing text
+def writeText(window, written, color, cenX, cenY):
+    font = pygame.font.Font(None, 75)
+    text = font.render(written, 1, color)
+    textpos = text.get_rect()
+    textpos.centerx = cenX
+    textpos.centery = cenY
+    window.blit(text, textpos)
+    return (textpos)
+
+# Game control variables
 leftClicked = False
 rightClicked = False
-spacePressed = False
+fPressed = False
+gameOver = False
 
+winCount = 0
 
 while True:
-    screen.fill(white)
+    while not (gameOver) and (winCount != bombCount):
+        screen.fill(white)
 
-    mousePos = pygame.mouse.get_pos()
+        mousePos = pygame.mouse.get_pos()
 
-    # For each cell in the grid, executes methods such as draw or check if clicked.
+        # For each cell in the grid, draws, checks if clicked or flagged, and if game has been won or lost
+        for i in range(gridLength):
+            for j in range(gridLength):
+                cell = grid[i][j]
+                cell.draw(screen)
+
+                # Revealing
+                if cell.has(mousePos) and leftClicked and not cell.revealed:
+                    cell.revealed = True
+                    if cell.bomb:
+                        gameOver = True
+                        break
+                    if cell.neighbors == 0 and not cell.bomb:
+                        cell.revealNeighbors(grid)
+
+                # Flagging and unflagging
+                if cell.has(mousePos) and rightClicked and not cell.flagged and not cell.revealed:
+                    cell.flagged = True
+                    if cell.bomb:
+                        winCount += 1
+                elif cell.has(mousePos) and fPressed and cell.flagged and not cell.revealed:
+                    cell.flagged = False
+                    if cell.bomb:
+                        winCount -= 1
+
+                # Win condition
+                if winCount == bombCount:
+                    gameOver = True
+
+        pygame.display.update()
+
+        # Kill program and check input loop
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+
+            mouseStates = pygame.mouse.get_pressed()
+
+            # Check left clicked
+            if event.type == MOUSEBUTTONDOWN and mouseStates[0] == 1:
+                leftClicked = True
+            else:
+                leftClicked = False
+
+            # Check right clicked
+            if event.type == MOUSEBUTTONDOWN and mouseStates[2] == 1:
+                rightClicked = True
+            else:
+                rightClicked = False
+
+            if event.type == KEYDOWN and event.key == K_f:
+                fPressed = True
+            else:
+                fPressed = False
+
+    # Game over loop
     for i in range(gridLength):
         for j in range(gridLength):
-            grid[i][j].draw(screen)
-            grid[i][j].writeNeighbors(screen)
+            cell = grid[i][j]
+            cell.revealed = True
+            cell.draw(screen)
 
-            if grid[i][j].has(mousePos) and leftClicked and not grid[i][j].revealed:
-                grid[i][j].revealed = True
-                if grid[i][j].neighbors == 0 and not grid[i][j].bomb and not grid[i][j].flagged:
-                    grid[i][j].revealNeighbors(grid)
-
-            elif grid[i][j].has(mousePos) and rightClicked and not grid[x][y].flagged:
-                grid[i][j].flagged = True
-            elif grid[i][j].has(mousePos) and grid[i][j].flagged and spacePressed:
-                grid[i][j].flagged = False
-
-            # DEBUG
-            # if grid[x][y].has(mousePos):
-                # print(grid[x][y].neighbors)
+    if winCount == bombCount:
+        writeText(screen, "You Won!", white, boardSide // 2, boardSide // 2)
+    else:
+        writeText(screen, "You Lost!", white, boardSide // 2, boardSide // 2)
 
     pygame.display.update()
-
-    # DEBUG
-    # print(pygame.mouse.get_pressed())
-
 
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             pygame.quit()
             sys.exit()
-
-        mouseStates = pygame.mouse.get_pressed()
-
-        # Checks which mouse buttons are pressed
-
-        # Left mouse button
-        if event.type == MOUSEBUTTONDOWN and mouseStates[0] == 1:
-            leftClicked = True
-        else:
-            leftClicked = False
-
-        # Right mouse button
-        if event.type == MOUSEBUTTONDOWN and mouseStates[2] == 1:
-            rightClicked = True
-        else:
-            rightClicked = False
-
-        if event.type == KEYDOWN and event.key == K_SPACE:
-            spacePressed = True
-        else:
-            spacePressed = False
