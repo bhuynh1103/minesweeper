@@ -1,4 +1,5 @@
 import pygame
+from pygame.draw import *
 from constants import *
 from random import randint
 
@@ -8,9 +9,9 @@ class Cell:
         self.i = i
         self.j = j
         # Calculates x and y based off of cell's indicies
-        self.x = i * (boardSide // gridLength)
-        self.y = j * (boardSide // gridLength)
-        self.w = boardSide // gridLength
+        self.w = screenSize // gridLength
+        self.x = i * self.w
+        self.y = j * self.w + self.w * 2
         # Bombs generated after cell instantiation
         self.bomb = False
         self.revealed = False
@@ -18,20 +19,21 @@ class Cell:
         # Neighbors counted after bomb generation
         self.neighbors = 0
 
+    def drawRect(self, window, color, edgeColor):
+        rect(window, color, (self.x, self.y, self.w, self.w))
+        rect(window, edgeColor, (self.x, self.y, self.w, self.w), 1)
+
     def draw(self, window):
         # Draws unrevealed cell
-        pygame.draw.rect(window, white, (self.x, self.y, self.w, self.w))
-        pygame.draw.rect(window, black, (self.x, self.y, self.w, self.w), 1)
+        self.drawRect(window, white, black)
 
         # Draws flag if the cell is flagged
         if self.flagged and not self.revealed:
-            pygame.draw.rect(window, gray(100), (self.x, self.y, self.w, self.w))
-            pygame.draw.rect(window, black, (self.x, self.y, self.w, self.w), 1)
+            self.drawRect(window, gray(100), black)
 
         # Draws revealed cell and nunber of neighbors inside of cell
         elif self.revealed:
-            pygame.draw.rect(window, gray(200), (self.x, self.y, self.w, self.w))
-            pygame.draw.rect(window, black, (self.x, self.y, self.w, self.w), 1)
+            self.drawRect(window, gray(200), black)
             self.writeNeighbors(window)
 
             # If the revealed cell is bomb, draws bomb
@@ -39,12 +41,12 @@ class Cell:
                 x = self.x + (self.w - (self.w * .75)) - (self.w * .125)
                 y = self.y + (self.w - (self.w * .75)) - (self.w * .125)
                 d = self.w * .75
-                pygame.draw.ellipse(window, gray(50), (x, y, d, d))
+                ellipse(window, gray(50), (x, y, d, d))
 
     # Writes number inside cell
     def writeNeighbors(self, window):
         if self.revealed and not self.bomb and not self.neighbors == 0:
-            font = pygame.font.Font(None, int((boardSide // gridLength) * .9))
+            font = pygame.font.Font(None, int((screenSize // gridLength) * .9))
             text = font.render(str(self.neighbors), 1, color[self.neighbors - 1])
             textpos = text.get_rect()
             textpos.centerx = self.x + self.w * .5
@@ -72,7 +74,8 @@ class Cell:
                             count += 1
             self.neighbors = count
 
-    # If cell is clicked, cell will reveal itself and revealNeighbors() if the cell clicked has zero neighbors
+    # If cell is clicked, cell will reveal itself and
+    # revealNeighbors() if the cell clicked has zero neighbors
     # Repeats if neighboring cell that was revealed has zero neighbors
     def reveal(self, grid):
         self.revealed = True
@@ -85,6 +88,14 @@ class Cell:
             for y in range(-1, 2):
                 i = self.i + x
                 j = self.j + y
+                cell = grid[i][j]
                 if not(i < 0 or j < 0 or i > gridLength - 1 or j > gridLength - 1):
-                    if not grid[i][j].bomb and not grid[i][j].revealed and not grid[i][j].flagged:
-                        grid[i][j].reveal(grid)
+                    if not cell.bomb and not cell.revealed and not cell.flagged:
+                        cell.reveal(grid)
+
+    def drawCorrect(self, window):
+        if self.flagged and not self.bomb:
+            line(window, red, (self.x, self.y), (self.x + self.w, self.y + self.w), 1)
+            line(window, red, (self.x, self.y + self.w), (self.x + self.w, self.y), 1)
+        elif self.flagged and self.bomb:
+            rect(window, brightGreen, (self.x, self.y, self.w, self.w), 1)
