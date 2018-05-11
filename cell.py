@@ -88,8 +88,8 @@ class Cell:
             for y in range(-1, 2):
                 i = self.i + x
                 j = self.j + y
-                cell = grid[i][j]
                 if not(i < 0 or j < 0 or i > gridLength - 1 or j > gridLength - 1):
+                    cell = grid[i][j]
                     if not cell.bomb and not cell.revealed and not cell.flagged:
                         cell.reveal(grid)
 
